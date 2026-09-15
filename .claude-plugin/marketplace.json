@@ -1,0 +1,17 @@
+{
+  "name": "forgegui",
+  "metadata": {
+    "description": "ForgeGUI asset generation and Roblox Studio workflow plugins."
+  },
+  "owner": {
+    "name": "ForgeGUI"
+  },
+  "plugins": [
+    {
+      "name": "mcp",
+      "source": "./plugins/forgegui-roblox-builder",
+      "description": "Build Roblox experiences with ForgeGUI assets and the official Roblox Studio MCP.",
+      "version": "1.0.0"
+    }
+  ]
+}
