@@ -29,20 +29,22 @@ Roblox `insert_asset` accepts a numeric Roblox asset ID. A generated GLB URL is 
 
 Inspect the live tool schemas and, if needed, use Roblox's documentation tools to verify the import API and its execution permissions. A tool named `execute_luau` alone does not establish that file import or asset publishing is permitted. Use a verified import/upload bridge if one is available, within the user's authorized creator account and scope; check its returned IDs, moderation state, and access rights before insertion.
 
-A verified route exists for images, audio and 3D: `POST /assets/v1/assets` with the file, then poll the returned operation for `response.assetId`. GLB uploads directly as a `Model`; no Blender step, FBX conversion, or Studio import dialog is involved. Limits are 20 MB per file and 20,000 triangles per mesh, the latter enforced by the mesh pipeline rather than the upload endpoint, so check it before uploading rather than after. Whether a connected server exposes a tool for this route is separate from whether the route exists; discover the live tool schemas as above.
+A verified route exists for images, audio and 3D: `POST /assets/v1/assets` with the file, then poll the returned operation for `response.assetId`. GLB uploads directly as a `Model`; no Blender step, FBX conversion, or Studio import dialog is involved. Roblox's documented limits are 20 MB per file and 20,000 triangles per mesh; check both locally before uploading rather than relying on the upload endpoint to reject a breach. Whether a connected server exposes a tool for this route is separate from whether the route exists; discover the live tool schemas as above.
 
 If no bridge is exposed, explain the specific import step needed. Do not spend on an asset whose required insertion is blocked unless the user accepts generation with a manual handoff. Continue independent authorized scene or scripting work where useful.
+
+For images only, Roblox Studio MCP `upload_image` is a fallback when no Open Cloud upload tool is exposed. It rejects ForgeGUI artifact URLs as untrusted (issue #52). Download the image to the machine running the client, validate it, and serve that single file from that machine through a URL the upload route can reach, such as a localhost HTTP server. Confirm reachability before calling `upload_image`; do not assume a filesystem path or localhost URL is reachable from a remote fetcher. Serve only the intended asset, never credentials or a workspace directory. Use the returned Roblox image identifier in the GUI and verify it renders.
 
 ## 2D art and Roblox GUI
 
 - For illustrated panels and icons, let the art supply its own silhouette. Make the frame beneath the art transparent (`BackgroundTransparency = 1`), remove its `UICorner` and `UIStroke`, and disable its default border. Make the image element's background transparent too. Preserve unrelated containers and intentionally separate UI chrome.
 - Crop empty padding around the visible art while preserving its alpha transparency. Size and position GUI elements to the cropped art's shape and aspect ratio; do not stretch the artwork to fit an arbitrary frame. Check the result in the actual GUI at the target viewport size.
-- Upload images as `assetType: "Image"`, not `"Decal"`. A Decal asset ID cannot be loaded as a texture by the engine: `AssetService:CreateEditableImageAsync` fails on one, and an `ImageLabel` pointed at it renders blank while reporting no error. Both types upload and moderate successfully, so the failure appears only at render time. This matches the symptom reported in issue #52. Use `Decal` only to apply an image to a part surface, never for GUI.
+- Upload images as `assetType: "Image"`, not `"Decal"`. A Decal asset ID cannot be loaded as a texture by the engine: `AssetService:CreateEditableImageAsync` fails on one, and an `ImageLabel` pointed at it renders blank while reporting no error. Both types upload and moderate successfully, so the failure appears only at render time. Use `Decal` only to apply an image to a part surface, never for GUI.
 - Verify the image renders after insertion rather than assuming an approved upload is usable.
 
 ## Audio import
 
-Audio imports through the Open Cloud Assets API as `assetType: "Audio"` and returns a numeric asset ID usable as `Sound.SoundId`. Audio is never Open Use, so it plays only in places owned by the uploading account.
+Audio imports through the Open Cloud Assets API as `assetType: "Audio"` and returns a numeric asset ID usable as `Sound.SoundId`. Audio is never Open Use, so it plays only in places owned by the uploading account. As above, the route existing is separate from a connected server exposing a tool for it; if none is exposed, disclose the manual import step before spending (issue #53).
 
 Moderation is not settled when the upload completes. An upload can return a real asset ID while still `Reviewing` and clear minutes later. Report the returned moderation state rather than treating a completed operation as success, and re-read it with `GET /assets/v1/assets/{assetId}` before telling the user the sound is ready.
 
