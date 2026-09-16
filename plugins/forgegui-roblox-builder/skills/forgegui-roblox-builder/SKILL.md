@@ -33,7 +33,7 @@ A verified route exists for images, audio and 3D: `POST /assets/v1/assets` with 
 
 If no bridge is exposed, explain the specific import step needed. Do not spend on an asset whose required insertion is blocked unless the user accepts generation with a manual handoff. Continue independent authorized scene or scripting work where useful.
 
-For images only, Roblox Studio MCP `upload_image` is a fallback when no Open Cloud upload tool is exposed. It rejects ForgeGUI artifact URLs as untrusted ([lime-tool #52](https://github.com/elwinhe/lime-tool/issues/52)). Download the image to the machine running the client, validate it, and serve that single file from that machine through a URL the upload route can reach, such as a localhost HTTP server. Confirm reachability before calling `upload_image`; do not assume a filesystem path or localhost URL is reachable from a remote fetcher. Serve only the intended asset, never credentials or a workspace directory. Use the returned Roblox image identifier in the GUI and verify it renders.
+For images only, Roblox Studio MCP `upload_image` is a fallback when no Open Cloud upload tool is exposed. It rejects ForgeGUI artifact URLs as untrusted ("Image Url is not trusted", observed in testing). Download the image to the machine running the client, validate it, and serve that single file from that machine through a URL the upload route can reach, such as a localhost HTTP server. Confirm reachability before calling `upload_image`; do not assume a filesystem path or localhost URL is reachable from a remote fetcher. Serve only the intended asset, never credentials or a workspace directory. Use the returned Roblox image identifier in the GUI and verify it renders.
 
 ## 2D art and Roblox GUI
 
@@ -44,7 +44,7 @@ For images only, Roblox Studio MCP `upload_image` is a fallback when no Open Clo
 
 ## Audio import
 
-Audio imports through the Open Cloud Assets API as `assetType: "Audio"` and returns a numeric asset ID usable as `Sound.SoundId`. Per Roblox's documentation, Audio is not Open Use, so expect it to play only in places owned by the uploading account; this was verified only in an owned place, so confirm access for the target experience before claiming readiness. As above, the route existing is separate from a connected server exposing a tool for it; if none is exposed, disclose the manual import step before spending ([lime-tool #53](https://github.com/elwinhe/lime-tool/issues/53)).
+Audio imports through the Open Cloud Assets API as `assetType: "Audio"` and returns a numeric asset ID usable as `Sound.SoundId`. Per Roblox's documentation, Audio is not Open Use, so expect it to play only in places owned by the uploading account; this was verified only in an owned place, so confirm access for the target experience before claiming readiness. As above, the route existing is separate from a connected server exposing a tool for it; if none is exposed, disclose the manual import step before spending.
 
 Moderation is not settled when the upload completes. An upload can return a real asset ID while still `Reviewing` and clear minutes later. Report the returned moderation state rather than treating a completed operation as success, and re-read it with `GET /assets/v1/assets/{assetId}` before telling the user the sound is ready.
 
